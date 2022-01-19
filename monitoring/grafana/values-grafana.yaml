@@ -73,7 +73,7 @@ livenessProbe:
 
 image:
   repository: grafana/grafana
-  tag: 8.3.1
+  tag: 8.3.4
   sha: ""
   pullPolicy: IfNotPresent
 
@@ -181,12 +181,12 @@ hostAliases: []
   #     - "my.host.com"
 
 ingress:
-  enabled: false #true
+  enabled: false
   # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
   # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
   # ingressClassName: nginx
   # Values can be templated
-  annotations:
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   labels: {}
@@ -196,7 +196,7 @@ ingress:
   pathType: Prefix
 
   hosts:
-    - grafana.meudominio.local #chart-example.local localhost
+    - chart-example.local
   ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
   extraPaths: []
   # - path: /*
@@ -218,13 +218,13 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources:
-  limits:
-    cpu: 400m #100m
-    memory: 512Mi #128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
+resources: {}
+#  limits:
+#    cpu: 100m
+#    memory: 128Mi
+#  requests:
+#    cpu: 100m
+#    memory: 128Mi
 
 ## Node labels for pod assignment
 ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -444,24 +444,23 @@ extraVolumeMounts: []
 
 ## Pass the plugins you want installed as a list.
 ##
-plugins:
+plugins: []
   # - digrich-bubblechart-panel
-  - grafana-clock-panel
+  # - grafana-clock-panel
 
 ## Configure grafana datasources
 ## ref: http://docs.grafana.org/administration/provisioning/#datasources
 ##
-datasources:
-  datasources.yaml:
-  apiVersion: 1
-  datasources:
-  - name: Prometheus
-    type: prometheus
-#    url: http://prometheus-prometheus-server
-    url: http://prometheus.prometheus.svc.cluster.local:9090
-    access: default
-    isDefault: true
-#   - name: CloudWatch
+datasources: {}
+#  datasources.yaml:
+#    apiVersion: 1
+#    datasources:
+#    - name: Prometheus
+#      type: prometheus
+#      url: http://prometheus-prometheus-server
+#      access: proxy
+#      isDefault: true
+#    - name: CloudWatch
 #      type: cloudwatch
 #      access: proxy
 #      uid: cloudwatch
@@ -493,31 +492,18 @@ notifiers: {}
 ##
 ## `path` must be /var/lib/grafana/dashboards/<provider_name>
 ##
-dashboardProviders:
-  dashboardproviders.yaml:
-    apiVersion: 1
-    providers:
-  # <string> an unique provider name. Required
-    - name: 'default'
-    # <int> Org id. Default to 1
-      orgId: 1
-    # <string> name of the dashboard folder.
-      folder: ''
-    # <string> folder UID. will be automatically generated if not specified
-      folderUid: ''
-    # <string> provider type. Default to 'file'
-      type: file
-    # <bool> disable dashboard deletion
-      disableDeletion: false
-    # <int> how often Grafana will scan for changed dashboards
-      updateIntervalSeconds: 10
-    # <bool> allow updating provisioned dashboards from the UI
-      allowUiUpdates: false
-      options:
-      # <string, required> path to dashboard files on disk. Required when using the 'file' type
-        path: /var/lib/grafana/dashboards/
-      # <bool> use folder names from filesystem to create folders in Grafana
-        foldersFromFilesStructure: true
+dashboardProviders: {}
+#  dashboardproviders.yaml:
+#    apiVersion: 1
+#    providers:
+#    - name: 'default'
+#      orgId: 1
+#      folder: ''
+#      type: file
+#      disableDeletion: false
+#      editable: true
+#      options:
+#        path: /var/lib/grafana/dashboards/default
 
 ## Configure grafana dashboard to import
 ## NOTE: To use dashboards you must also enable/configure dashboardProviders
@@ -525,13 +511,13 @@ dashboardProviders:
 ##
 ## dashboards per provider, use provider name as key.
 ##
-dashboards:
-  default:
+dashboards: {}
+  # default:
   #   some-dashboard:
   #     json: |
   #       $RAW_JSON
-    custom-dashboard:
-      file: dashboards/ContainerMetrics.json
+  #   custom-dashboard:
+  #     file: dashboards/custom-dashboard.json
   #   prometheus-stats:
   #     gnetId: 2
   #     revision: 2
@@ -645,9 +631,9 @@ sidecar:
   securityContext: {}
   # skipTlsVerify Set to true to skip tls verification for kube api calls
   # skipTlsVerify: true
-  enableUniqueFilenames: false
+  enableUniqueFilenames: true
   dashboards:
-    enabled: false
+    enabled: true
     SCProvider: true
     # label that the configmaps with dashboards are marked with
     label: grafana_dashboard
@@ -677,7 +663,7 @@ sidecar:
       # orgid as configured in grafana
       orgid: 1
       # folder in which the dashboards should be imported in grafana
-      folder: ''
+      folder: 'dojot'
       # type of the provider
       type: file
       # disableDelete to activate a import-only behaviour
@@ -685,7 +671,7 @@ sidecar:
       # allow updating provisioned dashboards from the UI
       allowUiUpdates: false
       # allow Grafana to replicate dashboard structure from filesystem
-      foldersFromFilesStructure: false
+      foldersFromFilesStructure: true
     # Additional dashboard sidecar volume mounts
     extraMounts: []
   datasources:
@@ -742,6 +728,7 @@ imageRenderer:
     HTTP_HOST: "0.0.0.0"
     # RENDERING_ARGS: --no-sandbox,--disable-gpu,--window-size=1280x758
     # RENDERING_MODE: clustered
+    # IGNORE_HTTPS_ERRORS: true
   # image-renderer deployment serviceAccount
   serviceAccountName: ""
   # image-renderer deployment securityContext
@@ -758,6 +745,8 @@ imageRenderer:
     # image-renderer service port used by both service and deployment
     port: 8081
     targetPort: 8081
+  # If https is enabled in Grafana, this needs to be set as 'https' to correctly configure the callback used in Grafana
+  grafanaProtocol: http
   # In case a sub_path is used this needs to be added to the image renderer callback
   grafanaSubPath: ""
   # name of the image-renderer port on the pod
@@ -802,3 +791,18 @@ networkPolicy:
   ##    - {key: role, operator: In, values: [frontend]}
   ##
   explicitNamespacesSelector: {}
+
+# Enable backward compatibility of kubernetes where version below 1.13 doesn't have the enableServiceLinks option
+enableKubeBackwardCompatibility: false
+
+# Create a dynamic manifests via values:
+extraObjects: []
+  # - apiVersion: "kubernetes-client.io/v1"
+  #   kind: ExternalSecret
+  #   metadata:
+  #     name: grafana-secrets
+  #   spec:
+  #     backendType: gcpSecretsManager
+  #     data:
+  #       - key: grafana-admin-password
+  #         name: adminPassword
