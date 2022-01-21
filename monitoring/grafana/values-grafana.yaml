@@ -160,7 +160,7 @@ serviceMonitor:
   ##
   enabled: false
   path: /metrics
-  #  namespace: monitoring  (defaults to use the namespace this chart is deployed to)
+  # namespace: monitoring  (defaults to use the namespace this chart is deployed to)
   labels: {}
   interval: 1m
   scheme: http
