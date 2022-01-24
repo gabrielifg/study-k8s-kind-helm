@@ -219,7 +219,7 @@ alertmanager:
     ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
     ##   GKE, AWS & OpenStack)
     ##
-    # storageClass: "local-path"
+    # storageClass: "-"
 
     ## alertmanager data Persistent Volume Binding Mode
     ## If defined, volumeBindingMode: <volumeBindingMode>
@@ -695,7 +695,7 @@ server:
     - web.enable-lifecycle
     ## web.enable-admin-api flag controls access to the administrative HTTP API which includes functionality such as
     ## deleting time series. This is disabled by default.
-    - web.enable-admin-api
+    # - web.enable-admin-api
     ##
     ## storage.tsdb.no-lockfile flag controls BD locking
     # - storage.tsdb.no-lockfile
@@ -802,7 +802,7 @@ server:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - prometheus.meudominio.com
+      - prometheus.meudominio.local
     #   - domain.com/prometheus
 
     path: /
@@ -1386,14 +1386,6 @@ serverFiles:
         static_configs:
           - targets:
             - localhost:9090
-
-      - job_name: grafana
-        scrape_interval: 5m
-        scrape_timeout: 30s
-        static_configs:
-          - targets:
-            - grafana.default.svc.cluster.local:3000
-
 
       # A scrape configuration for running Prometheus on a Kubernetes cluster.
       # This uses separate scrape configs for cluster components (i.e. API server, node)
